@@ -66,6 +66,8 @@ const login = async () => {
           type: 'negative',
           message: errorMessage
         });
+
+
       } else if (typeof errorMessage === 'object' && errorMessage.email) {
         const emailErrorMessage = errorMessage.email[0];
 
@@ -81,7 +83,8 @@ const login = async () => {
       });
     }
   }
-
+  email.value = null
+  password.value = null
   isLoading.value = false;
 };
 </script>

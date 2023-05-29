@@ -7,13 +7,11 @@
 
             <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
 
-
-
                 <q-input label="Email" v-model="email" filled type="email" hint="Email"
-                    :rules="[val => val && val.length > 0 || 'Please Provide Email']" />
+                    required />
 
                 <q-input filled v-model="phone" label="Phone" mask="(###) ### - ####" hint="Mask: (###) ### - ####"
-                    :rules="[val => val && val.length > 0 || 'Please Provide Phone No']" />
+                required />
 
 
                 <q-select  v-model="usertype" filled :options="options" label="User Type" />
@@ -21,7 +19,7 @@
 
 
                 <q-input filled v-model="username" label="Username" hint="Name and surname" lazy-rules
-                    :rules="[val => val && val.length > 0 || 'Please type something']" />
+                required />
 
                 <q-input v-model="password" filled type="password" hint="Password" />
 
@@ -58,7 +56,7 @@ const user = useUserstore()
 
 const email = ref(null)
 const phone = ref(null)
-const username = ref(false)
+const username = ref()
 
 const password = ref('')
 const confirmpassword = ref('')
@@ -66,7 +64,7 @@ const isPwd = ref(true)
 const usertype = ref('visitor')
 
 const options = ref([
-        'visitor', 'admin'
+   'visitor', 'admin'
 ])
 
 const isLoading = ref(false);
@@ -85,66 +83,73 @@ const props = defineProps({
 
 async function onSubmit() {
 
-    isLoading.value = true
-    try {
-        const token = sessionStorage.getItem('token')
-        const formdata = {
-            "email": email.value,
-            "phoneno": phone.value,
-            "username": username.value,
-            "password": password.value,
-            "name": username.value,
-            "usertype": usertype.value
-        }
+    if(confirmpassword.value!=password.value){
+        $q.notify({
+            type: 'warning',
+            message: 'Please Confirm Password Not Match'
+        });
+    }else{
 
-        const create = await user.register(formdata, token)
+            isLoading.value = true
+            try {
+                const token = sessionStorage.getItem('token')
+                const formdata = {
+                    "email": email.value,
+                    "phoneno": phone.value,
+                    "username": username.value,
+                    "password": password.value,
+                    "name": username.value,
+                    "usertype": usertype.value
+                }
 
-        if (create) {
-            $q.notify({
-                type: 'positive',
-                message: 'Successfully Save  in'
-            });
+                const create = await user.register(formdata, token)
 
-             email.value = ''
-             phone.value = ''
-             username.value = ''
-             password.value = ''
-             confirmpassword.value = ''
+                if (create) {
+                    $q.notify({
+                        type: 'positive',
+                        message: 'Successfully Save  in'
+                    });
 
-        } else {
-            $q.notify({
-                type: 'negative',
-                message: 'Invalid Save credentials'
-            });
-        }
-    } catch (error) {
-        if (error.response && error.response.data && error.response.data.message) {
-            const errorMessage = error.response.data.message;
+                    email.value = null
+                    phone.value = null
+                    username.value = null
+                    password.value = null
+                    confirmpassword.value = null
 
-            if (typeof errorMessage === 'string') {
-                $q.notify({
-                    type: 'negative',
-                    message: errorMessage
-                });
-            } else if (typeof errorMessage === 'object' && errorMessage.email) {
-                const emailErrorMessage = errorMessage.email[0];
+                } else {
+                    $q.notify({
+                        type: 'negative',
+                        message: 'Invalid Save credentials'
+                    });
+                }
+            } catch (error) {
+                if (error.response && error.response.data && error.response.data.message) {
+                    const errorMessage = error.response.data.message;
 
-                $q.notify({
-                    type: 'negative',
-                    message: emailErrorMessage
-                });
+                    if (typeof errorMessage === 'string') {
+                        $q.notify({
+                            type: 'negative',
+                            message: errorMessage
+                        });
+                    } else if (typeof errorMessage === 'object' && errorMessage.email) {
+                        const emailErrorMessage = errorMessage.email[0];
+
+                        $q.notify({
+                            type: 'negative',
+                            message: emailErrorMessage
+                        });
+                    }
+                } else {
+                    $q.notify({
+                        type: 'negative',
+                        message: 'An error occurred during Save'
+                    });
+                }
             }
-        } else {
-            $q.notify({
-                type: 'negative',
-                message: 'An error occurred during Save'
-            });
-        }
+
+            isLoading.value = false;
+            updateUser.va
     }
-
-    isLoading.value = false;
-    updateUser.va
-
 
 }
 

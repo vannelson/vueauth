@@ -93,7 +93,7 @@ async function fetchData() {
    if(response){
      
    }else{
-    // router.push('/login');
+    router.push('/login');
    }
 
    const mappedData = await response.data.map(item => {
